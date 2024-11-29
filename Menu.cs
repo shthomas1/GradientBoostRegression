@@ -8,7 +8,7 @@ public class Menu
 
     public Menu()
     {
-        options = new List<string>
+        options = new List<string> //The list is the menu. The menu is toggled through by the arrow keys and selected with enter
         {
             "Run All Predictions",
             "View All Previous Predictions",
@@ -20,7 +20,7 @@ public class Menu
         currentSelection = 0;
     }
 
-    public void ShowMenu(Action<int> onSelect)
+    public void ShowMenu(Action<int> onSelect) //Handles the menu selection
     {
         bool isRunning = true;
 
@@ -48,15 +48,18 @@ public class Menu
             switch (key)
             {
                 case ConsoleKey.UpArrow:
-                    currentSelection = (currentSelection > 0) ? currentSelection - 1 : options.Count - 1;
+                    currentSelection = (currentSelection > 0) ? currentSelection - 1 : options.Count - 1; //Toggles through the list (Reverse)
                     break;
                 case ConsoleKey.DownArrow:
-                    currentSelection = (currentSelection < options.Count - 1) ? currentSelection + 1 : 0;
+                    currentSelection = (currentSelection < options.Count - 1) ? currentSelection + 1 : 0; //Toggles through the list (Forward)
                     break;
                 case ConsoleKey.Enter:
                     onSelect(currentSelection);
                     break;
-                case ConsoleKey.Escape:
+                case ConsoleKey.Spacebar:
+                    onSelect(currentSelection);
+                    break;
+                case ConsoleKey.Escape: //Needed this when developing when I screwed up my switch cases and had no Clearing functions to make the menu legible. 
                     Environment.Exit(0);
                     break;
             }

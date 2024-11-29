@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 public class Program
 {
-    private static GradientBoostingModel model = new GradientBoostingModel();
-    private static List<(string Team, double Actual, double Predicted)> predictions = new List<(string, double, double)>();
+    private static GradientBoostingModel model = new GradientBoostingModel(); //Create a new instance of the model
+    private static List<(string Team, double Actual, double Predicted)> predictions = new List<(string, double, double)>(); //Create the list for showing model training data
 
-    public static void Main(string[] args)
+    public static void Main(string[] args) //Main menu instance
     {
         var menu = new Menu();
         menu.ShowMenu(OnMenuSelect);
     }
 
-    private static void OnMenuSelect(int option)
+    private static void OnMenuSelect(int option) //Menu Routing
     {
         switch (option)
         {
@@ -47,23 +47,23 @@ public class Program
         Console.ReadKey();
     }
 
-    private static void RunPrediction()
+    private static void RunPrediction() //User must actually run the prediction for all previous games in order to predict any.
     {
         Console.Clear();
         Console.WriteLine("=== Run Prediction ===");
 
         // Load dataset and debug encodings
         var dataSet = GameDayData.LoadDataset("gameday-data.csv");
-        GameDayData.DebugEncodings(); // Output encoding mappings for validation
+        GameDayData.DebugEncodings(); //Output encoding mappings for validation - When things go wrong, we know what went wrong.
 
-        // Prepare features and labels
+        //Prepare features and labels
         var (features, labels) = GameDayData.PrepareData(dataSet);
 
-        // Train model
+        //Create a new model and train the model
         model = new GradientBoostingModel();
         model.Train(features, labels);
 
-        // Generate predictions
+        //Generate predictions based on information gathered from all games.
         predictions.Clear();
         for (int i = 0; i < features.Length; i++)
         {
@@ -81,7 +81,8 @@ public class Program
         Console.Clear();
         Console.WriteLine("=== Last Training Error ===");
         Console.WriteLine($"Mean Squared Error (MSE): {model.LastError:0.00}");
-        Console.WriteLine("Press any key to return...");
+        Console.WriteLine($"Predicted error: {Math.Sqrt(model.LastError):0.00}"); //Just takes the root of the MSE, or outputs 0 if no data has been trained.
+        Console.WriteLine("\nPress any key to return...");
         Console.ReadKey();
     }
 
@@ -89,12 +90,12 @@ public class Program
     {
         Console.Clear();
         Console.WriteLine("=== All Predictions ===");
-        Console.WriteLine($"{"Team",-20} {"Actual Revenue",-15} {"Predicted Revenue",-20}");
+        Console.WriteLine($"{"Team",-20} {"Actual Revenue",-15} {"Predicted Revenue",-20}"); //The -20, -15, 55 and ,-20 in this row and all subsequent rows are related to the alignment of the columns in the console.
         Console.WriteLine(new string('-', 55));
 
         foreach (var (team, actual, predicted) in predictions)
         {
-            Console.WriteLine($"{team,-20} {actual,-15:0.00} {predicted,-20:0.00}");
+            Console.WriteLine($"{team,-20} {actual,-15:0.00} {predicted,-20:0.00}"); //Aligns all the outputs of the actual values with their labels above, as described above.
         }
 
         Console.WriteLine("\nPress any key to return...");
@@ -106,15 +107,15 @@ public class Program
         Console.Clear();
         Console.WriteLine("=== Predict Revenue for the Next Game ===");
 
-        // Get user input for Home/Away status
+        //Get user input for Home/Away status
         Console.Write("Enter if the game is home or away (home/away): ");
         string homeAway = Console.ReadLine()?.Trim().ToLower();
 
-        // Get user input for Opponent Team
+        //Get user input for Opponent Team
         Console.Write("Enter the opposing team: ");
         string team = Console.ReadLine()?.Trim();
 
-        // Get user input for Spread
+        //Get user input for Spread
         Console.Write("Enter the spread (e.g., -10.5): ");
         double spread;
         while (!double.TryParse(Console.ReadLine(), out spread))
@@ -122,17 +123,17 @@ public class Program
             Console.Write("Invalid input. Please enter a valid spread (e.g., -10.5): ");
         }
 
-        // Log encoding results for debugging
+        //Log encoding results for debugging
         Console.WriteLine($"Encoded Home/Away: {homeAway} => {GameDayData.EncodeHomeAway(homeAway)}");
         Console.WriteLine($"Encoded Team: {team} => {GameDayData.EncodeTeam(team)}");
 
-        // Validate inputs
+        //Validate inputs
         int homeAwayEncoded = GameDayData.EncodeHomeAway(homeAway);
         int teamEncoded = GameDayData.EncodeTeam(team);
 
         if (homeAwayEncoded == -1 || teamEncoded == -1)
         {
-            Console.WriteLine("Invalid inputs. Ensure the Home/Away status and Team are correct.");
+            Console.WriteLine("Invalid inputs. Ensure the Home/Away status and Team are correctly inputted (Not Case Sensitive).");
             Console.WriteLine($"Valid Home/Away values: {string.Join(", ", GameDayData.HomeAwayEncoding.Keys)}");
             Console.WriteLine($"Valid Teams: {string.Join(", ", GameDayData.TeamEncoding.Keys)}");
             Console.WriteLine("Press any key to return...");
@@ -140,7 +141,7 @@ public class Program
             return;
         }
 
-        // Prepare features for prediction
+        //Prepare features for prediction
         double[] inputFeatures = new double[]
         {
             homeAwayEncoded,
@@ -148,7 +149,7 @@ public class Program
             spread
         };
 
-        // Perform prediction
+        //Perform prediction and output to console
         double predictedRevenue = model.Predict(inputFeatures);
         Console.WriteLine($"\nPredicted Revenue for the Next Game: ${predictedRevenue:0.00}");
         Console.WriteLine("Press any key to return...");

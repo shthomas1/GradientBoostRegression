@@ -2,6 +2,10 @@
 
 This application uses real data from a local business in Tuscaloosa, AL. The data was legally obtained with the owner's consent for the sole purpose of creating this tool. Its primary goal is to help the business owner project future revenues based on historical data. This tool is designed to provide actionable insights that enable better decision-making, such as optimizing inventory, staffing, and marketing strategies.
 
+Revenue was pulled from the first regular season game of 2018, to the Oklahoma game of 2024 (11/23/2024). Some playoff games were included in order to give predictions for future playoffs, if applicable. 85 Games were surveyed.
+
+At the time of finishing this application, the idea was to predict Alabama vs Auburn sales at this particular bar/restaurant. The prediction with this current model was $12753.24, with a human evaluated error of +/- $2000. This youtube video can be seen here: https://www.youtube.com/watch?v=PaEly7lvnBo&feature=youtu.be
+
 ---
 
 ## Key Features

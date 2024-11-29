@@ -4,10 +4,10 @@ using System.IO;
 
 public class GameDayData
 {
-    public string HomeAway { get; set; }
-    public string Team { get; set; }
-    public double Spread { get; set; }
-    public double Revenue { get; set; }
+    public string HomeAway {get; set;}
+    public string Team {get; set;}
+    public double Spread {get; set;}
+    public double Revenue {get; set;}
 
     private static Dictionary<string, int> homeAwayEncoding = new Dictionary<string, int>();
     private static Dictionary<string, int> teamEncoding = new Dictionary<string, int>();
@@ -23,7 +23,7 @@ public class GameDayData
         using (StreamReader reader = new StreamReader(filePath))
         {
             string line;
-            reader.ReadLine(); // Skip header
+            reader.ReadLine(); //Skip header
             while ((line = reader.ReadLine()) != null)
             {
                 string[] parts = line.Split(',');
@@ -32,8 +32,8 @@ public class GameDayData
 
                 dataSet.Add(new GameDayData
                 {
-                    HomeAway = parts[0].Trim().ToLower(), // Ensure all entries are lowercase
-                    Team = parts[1].Trim().ToLower(),     // Ensure all entries are lowercase
+                    HomeAway = parts[0].Trim().ToLower(), //designates each position in the csv file
+                    Team = parts[1].Trim().ToLower(),
                     Revenue = double.Parse(parts[2]),
                     Spread = double.Parse(parts[3])
                 });

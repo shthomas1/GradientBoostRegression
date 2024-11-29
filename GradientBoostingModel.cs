@@ -9,7 +9,7 @@ public class GradientBoostingModel
 
     private List<DecisionTree> trees;
 
-    public double LastError { get; private set; } // Track the last calculated error
+    public double LastError {get; private set;} //Track the last calculated error
 
     public GradientBoostingModel(int numberOfIterations = 500, double learningRate = 0.05, int maxDepth = 4)
     {
