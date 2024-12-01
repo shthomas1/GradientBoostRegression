@@ -42,7 +42,7 @@ public class Program
         Console.Clear();
         Console.WriteLine("=== About ===");
         Console.WriteLine("This application predicts game-day revenue using Gradient Boosting.");
-        Console.WriteLine("The model is trained on historical data including Home/Away status, Opponent Team, and Spread.");
+        Console.WriteLine("The model is trained on historical data including Home/Away status, Opponent Team, and Betting Spread \n(This program recognizes Betting Spread as how many points the winning team expects to win by, represented by a negative number.\n)");
         Console.WriteLine("Press any key to return to the menu...");
         Console.ReadKey();
     }
@@ -93,7 +93,7 @@ public class Program
         Console.WriteLine($"{"Team",-20} {"Actual Revenue",-15} {"Predicted Revenue",-20}"); //The -20, -15, 55 and ,-20 in this row and all subsequent rows are related to the alignment of the columns in the console.
         Console.WriteLine(new string('-', 55));
 
-        foreach (var (team, actual, predicted) in predictions)
+        foreach (var (team, actual, predicted) in predictions) //Cycles through all the predictions made after the final epoch of training.
         {
             Console.WriteLine($"{team,-20} {actual,-15:0.00} {predicted,-20:0.00}"); //Aligns all the outputs of the actual values with their labels above, as described above.
         }
