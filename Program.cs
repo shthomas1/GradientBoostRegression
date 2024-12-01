@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 public class Program
 {
-    private static GradientBoostingModel model = new GradientBoostingModel(); //Create a new instance of the model
-    private static List<(string Team, double Actual, double Predicted)> predictions = new List<(string, double, double)>(); //Create the list for showing model training data
+    private static GradientBoostingModel model = new GradientBoostingModel(); // Create a new instance of the model
+    private static List<(string Team, double Actual, double Predicted)> predictions = new List<(string, double, double)>(); // Create the list for showing model training data
 
-    public static void Main(string[] args) //Main menu instance
+    public static void Main(string[] args) // Main menu instance
     {
-        AnimatedTitle(); //Show animated title
+        AnimatedTitle(); // Show animated title
         var menu = new Menu();
         menu.ShowMenu(OnMenuSelect);
     }
 
-    private static void AnimatedTitle() //Smooth blinking title with centering
+    private static void AnimatedTitle() // Smooth blinking title with centering
     {
         string[] titleLines = new string[]
         {
@@ -26,39 +26,39 @@ public class Program
             "░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░  ░▒▓██▓▒░  ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓████████▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ ",
         };
 
-        for (int blink = 0; blink < 3; blink++) //Repeat blinking 3 times
+        for (int blink = 0; blink < 3; blink++) // Repeat blinking 3 times
         {
             Console.Clear();
 
             foreach (string line in titleLines)
             {
-                CenterText(line); //Center each line of ASCII art
+                CenterText(line); // Center each line of ASCII art
             }
 
-            System.Threading.Thread.Sleep(300); //Pause for blinking effect
+            System.Threading.Thread.Sleep(300); // Pause for blinking effect
 
-            Console.Clear(); //Blink effect by clearing
-            System.Threading.Thread.Sleep(300); //Pause for off effect
+            Console.Clear(); // Blink effect by clearing
+            System.Threading.Thread.Sleep(300); // Pause for off effect
         }
 
-        Console.Clear(); //Ensure title stays after blinking
+        Console.Clear(); // Ensure title stays after blinking
         foreach (string line in titleLines)
         {
-            CenterText(line); //Display centered title without blinking
+            CenterText(line); // Display centered title without blinking
         }
     }
 
-    private static void CenterText(string text) //Centers text dynamically based on the console width
+    private static void CenterText(string text) // Centers text dynamically based on the console width
     {
         int windowWidth = Console.WindowWidth;
         int textLength = text.Length;
         int padding = (windowWidth - textLength) / 2;
 
-        if (padding > 0) Console.Write(new string(' ', padding)); //Add padding spaces
+        if (padding > 0) Console.Write(new string(' ', padding)); // Add padding spaces
         Console.WriteLine(text);
     }
 
-    private static void PrintWithTypingEffect(string text, int delay = 18) //Print text one character at a time for dramatic effect
+    private static void PrintWithTypingEffect(string text, int delay = 18) // Print text one character at a time for dramatic effect
     {
         foreach (char c in text)
         {
@@ -68,7 +68,7 @@ public class Program
         Console.WriteLine();
     }
 
-    private static void ShowLoading(string message, int length = 20, int delay = 20) //Simulates a loading effect
+    private static void ShowLoading(string message, int length = 20, int delay = 20) // Simulates a loading effect
     {
         Console.Write(message + " [");
         for (int i = 0; i < length; i++)
@@ -79,7 +79,7 @@ public class Program
         PrintWithTypingEffect("]");
     }
 
-    private static void OnMenuSelect(int option) //Menu Routing
+    private static void OnMenuSelect(int option) // Menu Routing
     {
         switch (option)
         {
@@ -109,16 +109,54 @@ public class Program
         }
     }
 
-    private static void ShowAbout()
+    private static void PredictNextGame()
     {
         Console.Clear();
-        AnimatedTitle();
-        System.Threading.Thread.Sleep(500); //Pauses the ASCII art and waits half a second for smooth transition to typing.
-        PrintWithTypingEffect("\n\n=====About=====");
-        PrintWithTypingEffect("This application predicts game-day revenue using Gradient Boosting.");
-        PrintWithTypingEffect("The model is trained on historical data including Home/Away status, Opponent Team, and Betting Spread");
-        PrintWithTypingEffect("(This program recognizes Betting Spread as how many points the winning team expects to win by, represented by a negative number)");
-        PrintWithTypingEffect("\n\nPress any key to return to the menu...");
+        PrintWithTypingEffect("=== Predict Revenue for the Next Game ===");
+
+        Console.Write("Enter if the game is home or away (home/away): ");
+        string homeAway = Console.ReadLine()?.Trim().ToLower();
+
+        Console.Write("Enter the opposing team: ");
+        string team = Console.ReadLine()?.Trim();
+
+        double spread;
+        do
+        {
+            Console.Write("Enter the spread (e.g., -10.5): ");
+            if (!double.TryParse(Console.ReadLine(), out spread) || spread > -5 || spread < -100)
+            {
+                Console.WriteLine("Invalid input. Spread must be a number between -5 and -100.");
+                Console.WriteLine("Spread represents the number of points the winning team is projected to win by.");
+            }
+            else
+            {
+                break;
+            }
+        } while (true);
+
+        PrintWithTypingEffect($"Encoded Home/Away: {homeAway} => {GameDayData.EncodeHomeAway(homeAway)}");
+        PrintWithTypingEffect($"Encoded Team: {team} => {GameDayData.EncodeTeam(team)}");
+
+        int homeAwayEncoded = GameDayData.EncodeHomeAway(homeAway);
+        int teamEncoded = GameDayData.EncodeTeam(team);
+
+        if (homeAwayEncoded == -1 || teamEncoded == -1)
+        {
+            PrintWithTypingEffect("Invalid inputs. Ensure the Home/Away status and Team are correctly inputted.");
+            PrintWithTypingEffect($"Valid Home/Away values: {string.Join(", ", GameDayData.HomeAwayEncoding.Keys)}");
+            PrintWithTypingEffect($"Valid Teams: {string.Join(", ", GameDayData.TeamEncoding.Keys)}");
+            PrintWithTypingEffect("Press any key to return...");
+            Console.ReadKey();
+            return;
+        }
+
+        double[] inputFeatures = { homeAwayEncoded, teamEncoded, spread };
+
+        double predictedRevenue = model.Predict(inputFeatures);
+        PrintWithTypingEffect($"\nPredicted Revenue for the Next Game: ${predictedRevenue:0.00}");
+        PrintWithTypingEffect($"Predicted Error for this result: {Math.Sqrt(model.LastError):0.00}");
+        PrintWithTypingEffect("Press any key to return...");
         Console.ReadKey();
     }
 
@@ -176,46 +214,16 @@ public class Program
         Console.ReadKey();
     }
 
-    private static void PredictNextGame()
+    private static void ShowAbout()
     {
         Console.Clear();
-        PrintWithTypingEffect("=== Predict Revenue for the Next Game ===");
-
-        Console.Write("Enter if the game is home or away (home/away): ");
-        string homeAway = Console.ReadLine()?.Trim().ToLower(); //Get user input for Home/Away status
-
-        Console.Write("Enter the opposing team: ");
-        string team = Console.ReadLine()?.Trim(); //Get user input for Opponent Team
-
-        Console.Write("Enter the spread (e.g., -10.5): ");
-        double spread;
-        while (!double.TryParse(Console.ReadLine(), out spread)) //Get user input for Spread
-        {
-            Console.Write("Invalid input. Please enter a valid spread (e.g., -10.5): ");
-        }
-
-        PrintWithTypingEffect($"Encoded Home/Away: {homeAway} => {GameDayData.EncodeHomeAway(homeAway)}");
-        PrintWithTypingEffect($"Encoded Team: {team} => {GameDayData.EncodeTeam(team)}");
-
-        int homeAwayEncoded = GameDayData.EncodeHomeAway(homeAway);
-        int teamEncoded = GameDayData.EncodeTeam(team);
-
-        if (homeAwayEncoded == -1 || teamEncoded == -1) //Validate inputs
-        {
-            PrintWithTypingEffect("Invalid inputs. Ensure the Home/Away status and Team are correctly inputted (Not Case Sensitive).");
-            PrintWithTypingEffect($"Valid Home/Away values: {string.Join(", ", GameDayData.HomeAwayEncoding.Keys)}");
-            PrintWithTypingEffect($"Valid Teams: {string.Join(", ", GameDayData.TeamEncoding.Keys)}");
-            PrintWithTypingEffect("Press any key to return...");
-            Console.ReadKey();
-            return;
-        }
-
-        double[] inputFeatures = new double[] { homeAwayEncoded, teamEncoded, spread }; //Prepare features for prediction
-
-        double predictedRevenue = model.Predict(inputFeatures); //Perform prediction and output to console
-        PrintWithTypingEffect($"\nPredicted Revenue for the Next Game: ${predictedRevenue:0.00}");
-        PrintWithTypingEffect($"Predicted Error for this result: {Math.Sqrt(model.LastError):0.00}");
-        PrintWithTypingEffect("Press any key to return...");
+        AnimatedTitle();
+        System.Threading.Thread.Sleep(500); //Pauses the ASCII art and waits half a second for smooth transition to typing.
+        PrintWithTypingEffect("\n\n=====About=====");
+        PrintWithTypingEffect("This application predicts game-day revenue using Gradient Boosting.");
+        PrintWithTypingEffect("The model is trained on historical data including Home/Away status, Opponent Team, and Betting Spread");
+        PrintWithTypingEffect("(This program recognizes Betting Spread as how many points the winning team expects to win by, represented by a negative number between -4 and -100)");
+        PrintWithTypingEffect("\n\nPress any key to return to the menu...");
         Console.ReadKey();
     }
 }

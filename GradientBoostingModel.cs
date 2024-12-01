@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 public class GradientBoostingModel
 {
-    private readonly int epochs; //Number of boosting iterations (how many trees will be added to the model)
-    private readonly double learningRate; //Step size for updating residuals in each iteration (How much the model adjusts its 'guess' each time it iterates)
-    private readonly int maxDepth; //Maximum depth of each decision tree in the model (In Gradient Boosting, a tree represents the full iteration, and the depth is how many 'leaves' are on the tree. These leaves group similar data points and make a prediction based on those points.)
+    private readonly int epochs; // Number of boosting iterations (how many trees will be added to the model)
+    private readonly double learningRate; // Step size for updating residuals in each iteration
+    private readonly int maxDepth; // Maximum depth of each decision tree in the model
 
-    private List<DecisionTree> trees; //List to store the ensemble of decision trees
+    private List<DecisionTree> trees; // List to store the ensemble of decision trees
 
-    public double LastError { get; private set; } //Tracks the final Mean Squared Error (MSE) after training
+    public double LastError { get; private set; } // Tracks the final Mean Squared Error (MSE) after training
 
     public GradientBoostingModel(int epochs = 500, double learningRate = 0.05, int maxDepth = 4)
     {
@@ -21,35 +21,61 @@ public class GradientBoostingModel
 
     public void Train(double[][] features, double[] labels)
     {
-        double[] residuals = new double[labels.Length]; //Array to store residuals for each data point
-
-        for (int i = 0; i < labels.Length; i++)
+        if (features.Length == 0 || labels.Length == 0 || features.Length != labels.Length)
         {
-            residuals[i] = labels[i]; //Start with residuals equal to the actual labels (predictions are initially zero)
+            throw new ArgumentException("Features and labels must be non-empty and have the same length.");
         }
 
-        for (int iter = 0; iter < epochs; iter++) //Perform boosting for the specified number of epochs
+        double[] residuals = new double[labels.Length]; // Array to store residuals for each data point
+
+        // Initialize residuals to the actual labels
+        for (int i = 0; i < labels.Length; i++)
+        {
+            residuals[i] = labels[i];
+        }
+
+        for (int iter = 0; iter < epochs; iter++) // Perform boosting for the specified number of epochs
         {
             DecisionTree tree = new DecisionTree(maxDepth);
-            tree.Train(features, residuals); //Train the tree on the current residuals
-            trees.Add(tree); //Add the trained tree to the ensemble
+            tree.Train(features, residuals); // Train the tree on the current residuals
+            trees.Add(tree); // Add the trained tree to the ensemble
 
+            // Update residuals using the tree's predictions
             for (int i = 0; i < residuals.Length; i++)
             {
-                residuals[i] -= learningRate * tree.Predict(features[i]); //Update residuals using the tree's predictions
+                double prediction = tree.Predict(features[i]);
+
+                if (double.IsNaN(prediction) || double.IsInfinity(prediction))
+                {
+                    throw new InvalidOperationException($"Invalid prediction detected during training at iteration {iter}: {prediction}");
+                }
+
+                residuals[i] -= learningRate * prediction;
             }
         }
 
-        LastError = CalculateMeanSquaredError(features, labels); //Calculate the final MSE after training
+        LastError = CalculateMeanSquaredError(features, labels); // Calculate the final MSE after training
+
+        if (double.IsNaN(LastError) || double.IsInfinity(LastError))
+        {
+            throw new InvalidOperationException("Invalid error calculated after training.");
+        }
     }
 
     public double Predict(double[] features)
     {
-        double prediction = 0.0; //The initial prediction is zero. This number does affect the final outcome by a small amount, but a large number of iterations makes this incredibly miniscule. In short, the user (In this case, the writer of this code, makes an initial prediction on sales for the first iteration across the board.)
+        double prediction = 0.0; // Start with an initial prediction of zero
 
-        foreach (var tree in trees) //Aggregate predictions from all the trained trees
+        foreach (var tree in trees) // Aggregate predictions from all the trained trees
         {
-            prediction += learningRate * tree.Predict(features); //Scale each tree's prediction by the learning rate
+            double treePrediction = tree.Predict(features);
+
+            if (double.IsNaN(treePrediction) || double.IsInfinity(treePrediction))
+            {
+                throw new InvalidOperationException($"Invalid tree prediction: {treePrediction}");
+            }
+
+            prediction += learningRate * treePrediction; // Scale each tree's prediction by the learning rate
         }
 
         return prediction;
@@ -61,10 +87,16 @@ public class GradientBoostingModel
 
         for (int i = 0; i < features.Length; i++)
         {
-            double prediction = Predict(features[i]); //Get the model's prediction for the current data point
-            errorSum += Math.Pow(labels[i] - prediction, 2); //Compute the squared error
+            double prediction = Predict(features[i]); // Get the model's prediction for the current data point
+
+            if (double.IsNaN(prediction) || double.IsInfinity(prediction))
+            {
+                throw new InvalidOperationException($"Invalid prediction during error calculation: {prediction}");
+            }
+
+            errorSum += Math.Pow(labels[i] - prediction, 2); // Compute the squared error
         }
 
-        return errorSum / features.Length; //Return the average squared error (MSE)
+        return errorSum / features.Length; // Return the average squared error (MSE)
     }
 }
