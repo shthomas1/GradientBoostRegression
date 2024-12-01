@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 public class Menu
 {
     private List<string> options;
@@ -35,13 +32,14 @@ public class Menu
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"> {options[i]}");
-                    Console.ResetColor();
                 }
                 else
                 {
+                    Console.ForegroundColor = ConsoleColor.Gray;
                     Console.WriteLine($"  {options[i]}");
                 }
             }
+            Console.ResetColor();
 
             ConsoleKey key = Console.ReadKey(true).Key;
 
@@ -54,12 +52,10 @@ public class Menu
                     currentSelection = (currentSelection < options.Count - 1) ? currentSelection + 1 : 0; //Toggles through the list (Forward)
                     break;
                 case ConsoleKey.Enter:
-                    onSelect(currentSelection);
-                    break;
                 case ConsoleKey.Spacebar:
                     onSelect(currentSelection);
                     break;
-                case ConsoleKey.Escape: //Needed this when developing when I screwed up my switch cases and had no Clearing functions to make the menu legible. 
+                case ConsoleKey.Escape:
                     Environment.Exit(0);
                     break;
             }
