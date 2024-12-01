@@ -68,7 +68,7 @@ public class Program
         Console.WriteLine();
     }
 
-    private static void ShowLoading(string message, int length = 20, int delay = 10) //Simulates a loading effect
+    private static void ShowLoading(string message, int length = 20, int delay = 20) //Simulates a loading effect
     {
         Console.Write(message + " [");
         for (int i = 0; i < length; i++)
