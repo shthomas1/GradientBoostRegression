@@ -237,14 +237,20 @@ public class Program
         StaticTitle();
         System.Threading.Thread.Sleep(500); //Pauses after the ASCII art populates and waits half a second for smooth transition to typing.
         PrintWithTypingEffect("\n\n=====About=====",8);
-        PrintWithTypingEffect("This application predicts game-day revenue using Gradient Boosting.",15);
-        PrintWithTypingEffect("Gradient Boosting is a form of machine learning which takes a single user-inputted prediction, and modifies that prediction over many training cycles called epochs.",15);
-        PrintWithTypingEffect("The original prediction of sales in this model is $0. However, due to a large amount of training cycles, it is capable of a high level of accuracy regardless of the original prediction.",15);
+        PrintWithTypingEffect("This application predicts game-day revenue using Gradient Boosting.",10);
+        PrintWithTypingEffect("Gradient Boosting is a form of machine learning which takes a single user-inputted prediction, and modifies that prediction over many training cycles called epochs.",10);
+        PrintWithTypingEffect("The original prediction of sales in this model is $0. However, due to a large amount of training cycles, it is capable of a high level of accuracy regardless of the original prediction.",10);
         Console.WriteLine();
         PrintWithTypingEffect("=====How to use this application=====",8);
-        PrintWithTypingEffect("This model is trained on historical data including Home/Away status, Opponent Team, and Betting Spread",15);
-        PrintWithTypingEffect("(This program recognizes Betting Spread as how many points the winning team expects to win by, represented by a negative number between -4 and -100)",15);
-        PrintWithTypingEffect("Predictions cannot be made without first training the data. You must select the second menu option before reviewing any training results or attempting to make predictions.",15);
+        PrintWithTypingEffect("This model is trained on historical data from a local bar/restuarant in Tuscaloosa. This data includes Home/Away status, Opponent Team, and Betting Spread",10);
+        PrintWithTypingEffect("(This program recognizes Betting Spread as how many points the winning team expects to win by, represented by a negative number between -4 and -100)",10);
+        PrintWithTypingEffect("Predictions cannot be made without first training the data. You must select the second menu option before reviewing any training results or attempting to make predictions.",10);
+        Console.WriteLine();
+        PrintWithTypingEffect("=====Real-World Application=====",8);
+        PrintWithTypingEffect("**For a Youtube video of sales that were predicted before the most recent Auburn-Alabama game on the 30th of November 2024, please see the README.**",5);
+        PrintWithTypingEffect("To predict sales for the most recent Iron Bowl, a user can input 'home', 'auburn', and '-10'. The user will receive a sales prediction of $12,753.24 if no training data is edited.",5);
+        PrintWithTypingEffect("Actual sales for this local restaurant on the 30th of November were $12,963, meaning this current model had an error of 1.6% on its very first live prediction.",5);
+        Console.WriteLine();
         PrintWithTypingEffect("\n\nPress any key to return to the menu...",8);
         Console.ReadKey();
     }
