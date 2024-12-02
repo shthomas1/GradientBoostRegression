@@ -12,7 +12,7 @@ public class GameDayData
     private static Dictionary<string, int> homeAwayEncoding = new Dictionary<string, int>();
     private static Dictionary<string, int> teamEncoding = new Dictionary<string, int>();
 
-    // Expose encodings as read-only properties
+    //Expose encodings as read-only properties
     public static IReadOnlyDictionary<string, int> HomeAwayEncoding => homeAwayEncoding;
     public static IReadOnlyDictionary<string, int> TeamEncoding => teamEncoding;
 
@@ -23,7 +23,7 @@ public class GameDayData
         using (StreamReader reader = new StreamReader(filePath))
         {
             string line;
-            reader.ReadLine(); //Skip header
+            reader.ReadLine(); //Skip header in csv file
             while ((line = reader.ReadLine()) != null)
             {
                 string[] parts = line.Split(',');

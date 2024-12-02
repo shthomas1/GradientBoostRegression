@@ -1,64 +1,74 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 public class Program
 {
-    private static GradientBoostingModel model = new GradientBoostingModel(); // Create a new instance of the model
-    private static List<(string Team, double Actual, double Predicted)> predictions = new List<(string, double, double)>(); // Create the list for showing model training data
+    private static GradientBoostingModel model = new GradientBoostingModel(); //Create a new instance of the model
+    private static List<(string Team, double Actual, double Predicted)> predictions = new List<(string, double, double)>(); //Create the list for showing model training data
 
-    public static void Main(string[] args) // Main menu instance
+    public static void Main(string[] args) //Main menu instance
     {
-        AnimatedTitle(); // Show animated title
+        AnimatedTitle(); //Show animated title
         var menu = new Menu();
         menu.ShowMenu(OnMenuSelect);
     }
 
-    private static void AnimatedTitle() // Smooth blinking title with centering
+    private static void AnimatedTitle() //Smooth blinking title with centering
     {
         string[] titleLines = new string[]
         {
-            "░▒▓███████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░       ░▒▓██████▓▒░░▒▓█▓▒░ ",
-            "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ ",
-            "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓█▓▒▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ ",
-            "░▒▓███████▓▒░░▒▓██████▓▒░  ░▒▓█▓▒▒▓█▓▒░░▒▓██████▓▒░ ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░        ░▒▓████████▓▒░▒▓█▓▒░ ",
-            "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        ░▒▓█▓▓█▓▒░ ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ ",
-            "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        ░▒▓█▓▓█▓▒░ ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ ",
-            "░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░  ░▒▓██▓▒░  ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓████████▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ ",
+            "░▒▓███████▓▒░ ░▒▓████████▓▒ ░▒▓█▓▒░░▒▓█▓▒ ░▒▓████████▓▒ ░▒▓███████▓▒░  ▒▓█▓▒░░▒▓█▓▒ ░▒▓████████▓▒░       ░▒▓██████▓▒░ ░▒▓█▓▒░ ",
+            "░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░ ",
+            "░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░        ░▒▓█▓▒▒▓█▓▒░ ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░ ",
+            "░▒▓███████▓▒░ ░▒▓██████▓▒░   ░▒▓█▓▒▒▓█▓▒░ ░▒▓██████▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓██████▓▒░        ░▒▓████████▓▒ ░▒▓█▓▒░ ",
+            "░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░         ░▒▓█▓▓█▓▒░  ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░ ",
+            "░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░         ░▒▓█▓▓█▓▒░  ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░ ",
+            "░▒▓█▓▒░░▒▓█▓▒ ░▒▓████████▓▒    ░▒▓██▓▒░   ░▒▓████████▓▒ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓██████▓▒░ ░▒▓████████▓▒░      ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░ ",
+            "May the sales be ever in your favor..."
         };
 
-        for (int blink = 0; blink < 3; blink++) // Repeat blinking 3 times
+        for (int blink = 0; blink < 3; blink++) //Repeat blinking 3 times
         {
             Console.Clear();
 
             foreach (string line in titleLines)
             {
-                CenterText(line); // Center each line of ASCII art
+                CenterText(line); //Center each line of ASCII art
             }
 
-            System.Threading.Thread.Sleep(300); // Pause for blinking effect
+            System.Threading.Thread.Sleep(300); //Pause for blinking effect
 
-            Console.Clear(); // Blink effect by clearing
-            System.Threading.Thread.Sleep(300); // Pause for off effect
+            Console.Clear(); //Blink effect by clearing
+            System.Threading.Thread.Sleep(300); //Pause for off effect
         }
 
-        Console.Clear(); // Ensure title stays after blinking
+        Console.Clear(); //Ensure title stays after blinking
         foreach (string line in titleLines)
         {
-            CenterText(line); // Display centered title without blinking
+            CenterText(line); //Display centered title without blinking
         }
     }
+    private static void StaticTitle(){ //Centered Static Title with tagline
+        
 
-    private static void CenterText(string text) // Centers text dynamically based on the console width
+        string text = "░▒▓███████▓▒░ ░▒▓████████▓▒ ░▒▓█▓▒░░▒▓█▓▒ ░▒▓████████▓▒ ░▒▓███████▓▒░  ▒▓█▓▒░░▒▓█▓▒ ░▒▓████████▓▒░       ░▒▓██████▓▒░ ░▒▓█▓▒░\n░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░\n░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░        ░▒▓█▓▒▒▓█▓▒░ ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░\n░▒▓███████▓▒░ ░▒▓██████▓▒░   ░▒▓█▓▒▒▓█▓▒░ ░▒▓██████▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓██████▓▒░        ░▒▓████████▓▒ ░▒▓█▓▒░\n░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░         ░▒▓█▓▓█▓▒░  ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░\n░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░         ░▒▓█▓▓█▓▒░  ░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░             ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░\n░▒▓█▓▒░░▒▓█▓▒ ░▒▓████████▓▒    ░▒▓██▓▒░   ░▒▓████████▓▒ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓██████▓▒░ ░▒▓████████▓▒░      ░▒▓█▓▒░░▒▓█▓▒ ░▒▓█▓▒░\nMay the sales be ever in your favor..."; //"It would be really funny if you made a line over 1000 characters long" He thought to himself.
+        foreach (string line in text.Split('\n')){
+            int logoPadding = (Console.WindowWidth - line.Length)/2;
+            System.Console.WriteLine(new string(' ', Math.Max(0, logoPadding))+line); //It would also be funny if we rewrote the centertext system command
+        }
+    } 
+    private static void CenterText(string text) //Centers text dynamically based on the console width
     {
         int windowWidth = Console.WindowWidth;
         int textLength = text.Length;
         int padding = (windowWidth - textLength) / 2;
 
-        if (padding > 0) Console.Write(new string(' ', padding)); // Add padding spaces
+        if (padding > 0) Console.Write(new string(' ', padding)); //Add padding spaces
         Console.WriteLine(text);
     }
 
-    private static void PrintWithTypingEffect(string text, int delay = 18) // Print text one character at a time for dramatic effect
+    private static void PrintWithTypingEffect(string text, int delay = 18) //Print text one character at a time for dramatic effect
     {
         foreach (char c in text)
         {
@@ -68,7 +78,7 @@ public class Program
         Console.WriteLine();
     }
 
-    private static void ShowLoading(string message, int length = 20, int delay = 20) // Simulates a loading effect
+    private static void ShowLoading(string message, int length = 20, int delay = 20) //Simulates a loading effect
     {
         Console.Write(message + " [");
         for (int i = 0; i < length; i++)
@@ -79,31 +89,38 @@ public class Program
         PrintWithTypingEffect("]");
     }
 
-    private static void OnMenuSelect(int option) // Menu Routing
+    private static void OnMenuSelect(int option) //Menu Routing
     {
         switch (option)
         {
             case 0:
+                ShowAbout();
+                break;
+                
+            case 1:
                 ShowLoading("Loading Prediction Engine...");
                 RunPrediction();
                 break;
-            case 1:
+
+            case 2:
                 ShowLoading("Gathering Predictions...");
                 ShowAllPredictions();
                 break;
-            case 2:
+                
+            case 3:
                 ShowLoading("Calculating Errors...");
                 ShowLastError();
                 break;
-            case 3:
+                
+            case 4:
                 ShowLoading("Preparing Next Prediction...");
                 PredictNextGame();
                 break;
-            case 4:
-                ShowAbout();
-                break;
+                
             case 5:
-                PrintWithTypingEffect("Exiting program... Goodbye!", 40);
+                Console.Clear();
+                StaticTitle();
+                PrintWithTypingEffect("Exiting program... Goodbye!", 20);
                 Environment.Exit(0);
                 break;
         }
@@ -217,13 +234,18 @@ public class Program
     private static void ShowAbout()
     {
         Console.Clear();
-        AnimatedTitle();
-        System.Threading.Thread.Sleep(500); //Pauses the ASCII art and waits half a second for smooth transition to typing.
-        PrintWithTypingEffect("\n\n=====About=====");
-        PrintWithTypingEffect("This application predicts game-day revenue using Gradient Boosting.");
-        PrintWithTypingEffect("The model is trained on historical data including Home/Away status, Opponent Team, and Betting Spread");
-        PrintWithTypingEffect("(This program recognizes Betting Spread as how many points the winning team expects to win by, represented by a negative number between -4 and -100)");
-        PrintWithTypingEffect("\n\nPress any key to return to the menu...");
+        StaticTitle();
+        System.Threading.Thread.Sleep(500); //Pauses after the ASCII art populates and waits half a second for smooth transition to typing.
+        PrintWithTypingEffect("\n\n=====About=====",8);
+        PrintWithTypingEffect("This application predicts game-day revenue using Gradient Boosting.",15);
+        PrintWithTypingEffect("Gradient Boosting is a form of machine learning which takes a single user-inputted prediction, and modifies that prediction over many training cycles called epochs.",15);
+        PrintWithTypingEffect("The original prediction of sales in this model is $0. However, due to a large amount of training cycles, it is capable of a high level of accuracy regardless of the original prediction.",15);
+        Console.WriteLine();
+        PrintWithTypingEffect("=====How to use this application=====",8);
+        PrintWithTypingEffect("This model is trained on historical data including Home/Away status, Opponent Team, and Betting Spread",15);
+        PrintWithTypingEffect("(This program recognizes Betting Spread as how many points the winning team expects to win by, represented by a negative number between -4 and -100)",15);
+        PrintWithTypingEffect("Predictions cannot be made without first training the data. You must select the second menu option before reviewing any training results or attempting to make predictions.",15);
+        PrintWithTypingEffect("\n\nPress any key to return to the menu...",8);
         Console.ReadKey();
     }
 }

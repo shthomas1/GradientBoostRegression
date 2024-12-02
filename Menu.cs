@@ -7,11 +7,11 @@ public class Menu
     {
         options = new List<string> //The list is the menu. The menu is toggled through by the arrow keys and selected with enter
         {
+            "About",
             "Run All Predictions",
             "View All Previous Predictions",
             "Review Total Error on all Predictions",
             "Predict Next Game's Revenue",
-            "About",
             "Exit"
         };
         currentSelection = 0;
