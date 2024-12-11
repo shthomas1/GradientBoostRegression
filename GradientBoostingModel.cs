@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 public class GradientBoostingModel
 {
-    private readonly int epochs; // Number of boosting iterations (how many trees will be added to the model)
-    private readonly double learningRate; // Step size for updating residuals in each iteration
-    private readonly int maxDepth; // Maximum depth of each decision tree in the model
+    private readonly int epochs; //Number of boosting iterations (how many trees will be added to the model)
+    private readonly double learningRate; //Step size for updating residuals in each iteration
+    private readonly int maxDepth; //Maximum depth of each decision tree in the model
 
-    private List<DecisionTree> trees; // List to store the ensemble of decision trees
+    private List<DecisionTree> trees; //List to store the ensemble of decision trees
 
-    public double LastError { get; private set; } // Tracks the final Mean Squared Error (MSE) after training
+    public double LastError { get; private set; } //Tracks the final Mean Squared Error (MSE) after training
 
     public GradientBoostingModel(int epochs = 500, double learningRate = 0.05, int maxDepth = 4)
     {
@@ -26,21 +26,21 @@ public class GradientBoostingModel
             throw new ArgumentException("Features and labels must be non-empty and have the same length.");
         }
 
-        double[] residuals = new double[labels.Length]; // Array to store residuals for each data point
+        double[] residuals = new double[labels.Length]; //Array to store residuals for each data point
 
-        // Initialize residuals to the actual labels
+        //Initialize residuals to the actual labels
         for (int i = 0; i < labels.Length; i++)
         {
             residuals[i] = labels[i];
         }
 
-        for (int iter = 0; iter < epochs; iter++) // Perform boosting for the specified number of epochs
+        for (int iter = 0; iter < epochs; iter++) //Perform boosting for the specified number of epochs
         {
             DecisionTree tree = new DecisionTree(maxDepth);
-            tree.Train(features, residuals); // Train the tree on the current residuals
-            trees.Add(tree); // Add the trained tree to the ensemble
+            tree.Train(features, residuals); //Train the tree on the current residuals
+            trees.Add(tree); //Add the trained tree to the ensemble
 
-            // Update residuals using the tree's predictions
+            //Update residuals using the tree's predictions
             for (int i = 0; i < residuals.Length; i++)
             {
                 double prediction = tree.Predict(features[i]);
@@ -54,7 +54,7 @@ public class GradientBoostingModel
             }
         }
 
-        LastError = CalculateMeanSquaredError(features, labels); // Calculate the final MSE after training
+        LastError = CalculateMeanSquaredError(features, labels); //Calculate the final MSE after training
 
         if (double.IsNaN(LastError) || double.IsInfinity(LastError))
         {
@@ -64,9 +64,9 @@ public class GradientBoostingModel
 
     public double Predict(double[] features)
     {
-        double prediction = 0.0; // Start with an initial prediction of zero
+        double prediction = 0.0; //Start with an initial prediction of zero
 
-        foreach (var tree in trees) // Aggregate predictions from all the trained trees
+        foreach (var tree in trees) //Aggregate predictions from all the trained trees
         {
             double treePrediction = tree.Predict(features);
 
@@ -75,7 +75,7 @@ public class GradientBoostingModel
                 throw new InvalidOperationException($"Invalid tree prediction: {treePrediction}");
             }
 
-            prediction += learningRate * treePrediction; // Scale each tree's prediction by the learning rate
+            prediction += learningRate * treePrediction; //Scale each tree's prediction by the learning rate
         }
 
         return prediction;
@@ -87,16 +87,16 @@ public class GradientBoostingModel
 
         for (int i = 0; i < features.Length; i++)
         {
-            double prediction = Predict(features[i]); // Get the model's prediction for the current data point
+            double prediction = Predict(features[i]); //Get the model's prediction for the current data point
 
             if (double.IsNaN(prediction) || double.IsInfinity(prediction))
             {
                 throw new InvalidOperationException($"Invalid prediction during error calculation: {prediction}");
             }
 
-            errorSum += Math.Pow(labels[i] - prediction, 2); // Compute the squared error
+            errorSum += Math.Pow(labels[i] - prediction, 2); //Compute the squared error
         }
 
-        return errorSum / features.Length; // Return the average squared error (MSE)
+        return errorSum / features.Length; //Return the average squared error (MSE)
     }
 }
